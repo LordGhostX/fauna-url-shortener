@@ -8,6 +8,7 @@ from faunadb.client import FaunaClient
 app = Flask(__name__)
 client = FaunaClient(secret="your-secret-here")
 
+
 def generate_identifier(n=6):
     identifier = ""
     for i in range(n):
@@ -23,6 +24,9 @@ def home():
 @app.route("/generate/<path:address>/")
 def generate(address):
     identifier = generate_identifier()
+    if not (address.startswith("http://") or address.startswith("https://")):
+        address = "http://" + address
+
     client.query(q.create(q.collection("urls"), {
         "data": {
             "identifier": identifier,
@@ -46,4 +50,3 @@ def fetch_original(identifier):
 
 if __name__ == "__main__":
     app.run(debug=True)
-	
