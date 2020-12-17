@@ -8,7 +8,6 @@ from faunadb.client import FaunaClient
 app = Flask(__name__)
 client = FaunaClient(secret="your-secret-here")
 
-
 def generate_identifier(n=6):
     identifier = ""
     for i in range(n):
@@ -37,14 +36,14 @@ def generate(address):
 
 @app.route("/<string:identifier>/")
 def fetch_original(identifier):
-    urls = client.query(q.paginate(q.match(q.index("urls"), identifier)))
-    if len(urls["data"]) == 0:
+    try:
+        url = client.query(
+            q.get(q.match(q.index("urls_by_identifier"), identifier)))
+    except:
         abort(404)
-
-    shortened_url = client.query(
-        q.get(q.ref(q.collection("urls"), urls["data"][0].id())))
-    return redirect(shortened_url["data"]["url"])
+    return redirect(url["data"]["url"])
 
 
 if __name__ == "__main__":
     app.run(debug=True)
+	
